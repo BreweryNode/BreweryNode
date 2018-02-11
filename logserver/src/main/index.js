@@ -23,6 +23,7 @@ function startDB() {
 
 function handleNewLog(msg) {
   return new Promise(function(resolve, reject) {
+    console.log(JSON.stringify(msg))cd ;
     let lLog = JSON.parse(msg.content.toString());
     if (!lLog.hasOwnProperty('message') || !lLog.hasOwnProperty('level')) {
       console.warn('Bad DTO: ' + JSON.stringify(lLog));

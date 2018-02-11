@@ -76,13 +76,10 @@
   "license": "GPL-3.0",
   "dependencies": {
     "brewerynode-common": "../common",
-    "dto": "../dto",
-    "sequelize-paper-trail": "../sequelize-paper-trail",
-    "amqplib": "^0.5.2",
+    "dto": "0.0.1-biggms",
+    "sequelize-paper-trail": "2.0.0-biggms",
     "bluebird": "^3.5.1",
     "mysql2": "^1.5.2",
-    "pm2": "^2.9.3",
-    "sequelize": "^4.33.3",
-    "winston": "^2.4.0"
+    "sequelize": "^4.33.3"
   }
 }

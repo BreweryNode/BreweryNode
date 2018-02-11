@@ -76,7 +76,6 @@
   "license": "GPL-3.0",
   "dependencies": {
     "amqplib": "^0.5.2",
-    "bluebird": "^3.5.1",
-    "pm2": "^2.9.3"
+    "bluebird": "^3.5.1"
   }
 }
