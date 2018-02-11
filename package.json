@@ -60,5 +60,9 @@
   "jest": {
     "testEnvironment": "node"
   },
-  "license": "GPL-3.0"
+  "license": "GPL-3.0",
+  "dependencies": {
+    "amqplib": "^0.5.2",
+    "pm2": "^2.9.3"
+  }
 }

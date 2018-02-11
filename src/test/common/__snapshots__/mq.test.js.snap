@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`mq doesnt-send 1`] = `"Channel closed"`;
+
+exports[`mq doesnt-send 2`] = `"First argument must be a string, Buffer, ArrayBuffer, Array, or array-like object."`;
+
+exports[`mq fails_to_connect 1`] = `"connect ECONNREFUSED 127.0.0.1:1"`;
+
+exports[`mq fails_to_disconnect 1`] = `"Connection closed (by client)"`;
+
+exports[`mq receives 1`] = `"This is a test"`;
