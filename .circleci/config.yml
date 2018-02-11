@@ -30,7 +30,7 @@ jobs:
       - save_cache:
           paths:
             - common/node_modules
-          key: common-v1-dependencies-{{ checksum "package.json" }}
+          key: common-v1-dependencies-{{ checksum "common/package.json" }}
 
       - run: cd logserver
       - restore_cache:
@@ -42,7 +42,7 @@ jobs:
       - save_cache:
           paths:
             - logserver/node_modules
-          key: logserver-v1-dependencies-{{ checksum "package.json" }}
+          key: logserver-v1-dependencies-{{ checksum "logserver/package.json" }}
 
       - restore_cache:
           keys:
@@ -53,7 +53,7 @@ jobs:
       - save_cache:
           paths:
             - tempertureserver/node_modules
-          key: temperatureserver-v1-dependencies-{{ checksum "package.json" }}
+          key: temperatureserver-v1-dependencies-{{ checksum "temperatureserver/package.json" }}
 
       - run: yarn run test-ci
 
