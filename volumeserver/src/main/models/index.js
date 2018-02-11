@@ -19,7 +19,6 @@ if (config.use_env_variable) {
   );
 }
 
-// Paper Trail options
 var opts = {
   UUID: true,
   enableCompression: true

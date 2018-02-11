@@ -1,7 +1,7 @@
 {
-  "name": "brewerynode-logserver",
+  "name": "brewerynode-volumeserver",
   "version": "0.0.1",
-  "description": "BreweryNode Logserver",
+  "description": "BreweryNode VolumeServer",
   "homepage": "",
   "author": {
     "name": "Graham Stewart",

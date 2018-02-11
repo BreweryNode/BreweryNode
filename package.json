@@ -31,7 +31,10 @@
     "format:all":
       "prettier --write \"{bin,lib,test}/**/*.js\" \"!**/expected/**\"",
     "test-ci":
-      "jest --config config.json --coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
+      "jest --config config.json --coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
+    "startpm2": "pm2 start ecosystem.config.js",
+    "stoppm2": "pm2 stop ecosystem.config.js",
+    "listpm2": "pm2 list"
   },
   "lint-staged": {
     "*.js": ["eslint --fix", "git add"],

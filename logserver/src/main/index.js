@@ -1,5 +1,6 @@
 var Promise = require('bluebird');
 var models;
+let mq = require('brewerynode-common').mq;
 var logutil = require('brewerynode-common').logutil;
 var winston = require('winston');
 
@@ -42,7 +43,6 @@ function handleNewLog(msg) {
 
 function startMQ() {
   return new Promise(function(resolve, reject) {
-    let mq = require('brewerynode-common').mq;
     console.log('Connecting to MQ');
     mq
       .connect(process.env.MQ_ADDRESS, 'amq.topic')
