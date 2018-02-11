@@ -2,6 +2,8 @@
 
 exports[`mq doesnt-send 1`] = `"Channel closed"`;
 
+exports[`mq doesnt-subscribe 1`] = `"Channel closed"`;
+
 exports[`mq fails_to_connect 1`] = `"connect ECONNREFUSED 127.0.0.1:1"`;
 
 exports[`mq fails_to_disconnect 1`] = `"Connection closed (by client)"`;

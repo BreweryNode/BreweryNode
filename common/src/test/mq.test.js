@@ -1,5 +1,4 @@
-jest.genMockFromModule('amqplib');
-const mq = require('../../main/common').mq;
+const mq = require('../main').mq;
 
 describe('mq', () => {
   it('fails_to_connect', () => {
@@ -66,5 +65,14 @@ describe('mq', () => {
   it('doesnt-send', async () => {
     expect.assertions(1);
     return expect(mq.send('test.v1.testmq')).rejects.toBeDefined();
+  });
+
+  it('doesnt-subscribe', async () => {
+    expect.assertions(1);
+    return expect(
+      mq.recv('test', 'test.v1.#', rec => {
+        message = rec;
+      })
+    ).rejects.toThrowErrorMatchingSnapshot();
   });
 });

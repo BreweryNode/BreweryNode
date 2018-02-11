@@ -1,14 +1,20 @@
 {
-  "name": "brewerynode",
+  "name": "brewerynode-logserver",
   "version": "0.0.1",
-  "description": "BreweryNode main project",
+  "description": "BreweryNode Logserver",
   "homepage": "",
   "author": {
     "name": "Graham Stewart",
     "email": "brewerynode@gmail.com",
     "url": ""
   },
-  "keywords": [""],
+  "files": [
+    "src/main"
+  ],
+  "main": "src/main/index.js",
+  "keywords": [
+    ""
+  ],
   "devDependencies": {
     "coveralls": "^2.13.1",
     "eslint": "^4.1.0",
@@ -28,17 +34,24 @@
     "precommit": "lint-staged",
     "test": "jest",
     "format": "prettier --write",
-    "format:all":
-      "prettier --write \"{bin,lib,test}/**/*.js\" \"!**/expected/**\"",
-    "test-ci":
-      "jest --config config.json --coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
+    "format:all": "prettier --write \"{bin,lib,test}/**/*.js\" \"!**/expected/**\"",
+    "test-ci": "jest --config config.json --coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
   },
   "lint-staged": {
-    "*.js": ["eslint --fix", "git add"],
-    "*.json": ["prettier --write", "git add"]
+    "*.js": [
+      "eslint --fix",
+      "git add"
+    ],
+    "*.json": [
+      "prettier --write",
+      "git add"
+    ]
   },
   "eslintConfig": {
-    "extends": ["xo", "prettier"],
+    "extends": [
+      "xo",
+      "prettier"
+    ],
     "env": {
       "jest": true,
       "node": true
@@ -52,7 +65,9 @@
         }
       ]
     },
-    "plugins": ["prettier"]
+    "plugins": [
+      "prettier"
+    ]
   },
   "repository": "https://github.com/BreweryNode/BreweryNode.git",
   "jest": {
@@ -60,6 +75,14 @@
   },
   "license": "GPL-3.0",
   "dependencies": {
-    "pm2": "^2.9.3"
+    "brewerynode-common": "../common",
+    "dto": "../dto",
+    "sequelize-paper-trail": "../sequelize-paper-trail",
+    "amqplib": "^0.5.2",
+    "bluebird": "^3.5.1",
+    "mysql2": "^1.5.2",
+    "pm2": "^2.9.3",
+    "sequelize": "^4.33.3",
+    "winston": "^2.4.0"
   }
 }
