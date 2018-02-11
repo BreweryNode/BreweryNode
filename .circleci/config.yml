@@ -21,18 +21,16 @@ jobs:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
         
-      - run: cd common
       - restore_cache:
           keys:
           - common-v1-dependencies-{{ checksum "package.json" }}
           # fallback to using the latest cache if no exact match is found
           - common-v1-dependencies-
-      - run: yarn install
+      - run: cd common && yarn install
       - save_cache:
           paths:
-            - node_modules
+            - common/node_modules
           key: common-v1-dependencies-{{ checksum "package.json" }}
-      - run: cd ..
 
       - run: cd logserver
       - restore_cache:
@@ -40,25 +38,22 @@ jobs:
           - logserver-v1-dependencies-{{ checksum "package.json" }}
           # fallback to using the latest cache if no exact match is found
           - logserver-v1-dependencies-
-      - run: yarn install
+      - run: cd logserver && yarn install
       - save_cache:
           paths:
-            - node_modules
+            - logserver/node_modules
           key: logserver-v1-dependencies-{{ checksum "package.json" }}
-      - run: cd ..
 
-      - run: cd temperatureserver
       - restore_cache:
           keys:
           - temperatureserver-v1-dependencies-{{ checksum "package.json" }}
           # fallback to using the latest cache if no exact match is found
           - temperatureserver-v1-dependencies-
-      - run: yarn install
+      - run: cd temperatureserver && yarn install
       - save_cache:
           paths:
-            - node_modules
+            - tempertureserver/node_modules
           key: temperatureserver-v1-dependencies-{{ checksum "package.json" }}
-      - run: cd ..
 
       - run: yarn run test-ci
 
