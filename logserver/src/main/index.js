@@ -45,7 +45,7 @@ function startMQ() {
     let mq = require('brewerynode-common').mq;
     console.log('Connecting to MQ');
     mq
-      .connect('amqp://localhost', 'amq.topic')
+      .connect(process.env.MQ_ADDRESS, 'amq.topic')
       .then(() => {
         console.log('MQ Connected');
         return Promise.all([mq.recv('logserver', 'logging.v1.#', handleNewLog)]);

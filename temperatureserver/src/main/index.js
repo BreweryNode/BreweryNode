@@ -56,7 +56,7 @@ function startMQ() {
   return new Promise(function(resolve, reject) {
     console.log('Connecting to MQ');
     mq
-      .connect('amqp://localhost', 'amq.topic')
+      .connect(process.env.MQ_ADDRESS, 'amq.topic')
       .then(() => {
         console.log('MQ Connected');
         return Promise.all([mq.recv('temperature', 'temperature.v1', handleNewReading)]);
