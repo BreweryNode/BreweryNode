@@ -1,7 +1,7 @@
 const Promise = require('bluebird');
 var models;
-let mq = require('brewerynode-common').mq;
-var logutil = require('brewerynode-common').logutil;
+let mq = require('../../../common/src/main').mq;
+var logutil = require('../../../common/src/main').logutil;
 
 function startDB() {
   return new Promise(function(resolve, reject) {

@@ -8,9 +8,13 @@
     "email": "brewerynode@gmail.com",
     "url": ""
   },
-  "files": ["src/main"],
+  "files": [
+    "src/main"
+  ],
   "main": "src/main/index.js",
-  "keywords": [""],
+  "keywords": [
+    ""
+  ],
   "devDependencies": {
     "coveralls": "^2.13.1",
     "eslint": "^4.1.0",
@@ -30,17 +34,24 @@
     "precommit": "lint-staged",
     "test": "jest",
     "format": "prettier --write",
-    "format:all":
-      "prettier --write \"{bin,lib,test}/**/*.js\" \"!**/expected/**\"",
-    "test-ci":
-      "jest --config config.json --coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
+    "format:all": "prettier --write \"{bin,lib,test}/**/*.js\" \"!**/expected/**\"",
+    "test-ci": "jest --config config.json --coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
   },
   "lint-staged": {
-    "*.js": ["eslint --fix", "git add"],
-    "*.json": ["prettier --write", "git add"]
+    "*.js": [
+      "eslint --fix",
+      "git add"
+    ],
+    "*.json": [
+      "prettier --write",
+      "git add"
+    ]
   },
   "eslintConfig": {
-    "extends": ["xo", "prettier"],
+    "extends": [
+      "xo",
+      "prettier"
+    ],
     "env": {
       "jest": true,
       "node": true
@@ -54,7 +65,9 @@
         }
       ]
     },
-    "plugins": ["prettier"]
+    "plugins": [
+      "prettier"
+    ]
   },
   "repository": "https://github.com/BreweryNode/BreweryNode.git",
   "jest": {
@@ -63,6 +76,7 @@
   "license": "GPL-3.0",
   "dependencies": {
     "amqplib": "^0.5.2",
+    "bluebird": "^3.5.1",
     "pm2": "^2.9.3"
   }
 }
