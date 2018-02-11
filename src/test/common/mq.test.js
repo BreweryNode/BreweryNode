@@ -11,12 +11,7 @@ describe('mq', () => {
 
   it('connects', () => {
     expect.assertions(1);
-    return expect(
-      mq.connect(
-        'amqp://jgvoxqek:b_W1ueA3zx7l8YSYFLGzfJ4qFPEyxBDR@penguin.rmq.cloudamqp.com/jgvoxqek',
-        'amq.topic'
-      )
-    ).resolves.toBeDefined();
+    return expect(mq.connect(process.env.MQ_ADDRESS, 'amq.topic')).resolves.toBeDefined();
   });
 
   let message;
