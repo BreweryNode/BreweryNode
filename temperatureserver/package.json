@@ -75,6 +75,7 @@
   },
   "license": "GPL-3.0",
   "dependencies": {
+    "brewerynode-common": "../common",
     "dto": "../dto",
     "sequelize-paper-trail": "../sequelize-paper-trail",
     "amqplib": "^0.5.2",

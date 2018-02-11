@@ -25,5 +25,8 @@ jobs:
           key: v1-dependencies-{{ checksum "package.json" }}
         
       # run tests!
+      - run: cd common && yarn install && cd ..
+      - run: cd logserver && yarn install && cd ..
+      - run: cd temperatureserver && yarn install && cd ..
       - run: yarn run test-ci
 
