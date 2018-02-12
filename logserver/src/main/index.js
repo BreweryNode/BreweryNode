@@ -23,7 +23,6 @@ function startDB() {
 
 function handleNewLog(msg) {
   return new Promise(function(resolve, reject) {
-    console.log(JSON.stringify(msg))cd ;
     let lLog = JSON.parse(msg.content.toString());
     if (!lLog.hasOwnProperty('message') || !lLog.hasOwnProperty('level')) {
       console.warn('Bad DTO: ' + JSON.stringify(lLog));
@@ -49,7 +48,7 @@ function startMQ() {
       .connect(process.env.MQ_ADDRESS, 'amq.topic')
       .then(() => {
         console.log('MQ Connected');
-        return Promise.all([mq.recv('logserver', 'logging.v1.#', handleNewLog)]);
+        return Promise.all([mq.recv('logserver', 'logging.v1.#', false, handleNewLog)]);
       })
       .then(() => {
         console.log('MQ Listening');

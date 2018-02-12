@@ -1,9 +1,15 @@
 const mq = require('./mq');
+const stackTrace = require('stack-trace');
+const path = require('path');
 
 exports.log = function(level, message) {
   let lLog = {};
   lLog.level = level;
   lLog.message = message;
+  let trace = stackTrace.get()[2];
+  let filename = trace.getFileName().split('/src/main');
+  let modulename = filename[0].slice(filename[0].lastIndexOf('/') + 1);
+  lLog.source = modulename + ':' + filename[1].slice(1) + ':' + trace.getLineNumber();
   return mq.send('logging.v1.' + level, JSON.stringify(lLog));
 };
 

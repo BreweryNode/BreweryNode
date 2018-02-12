@@ -37,86 +37,109 @@ function addTempertureProbe(pProbe) {
 }
 
 function handleCreateNew(msg) {
-  return new Promise(function(resolve, reject) {
-    let lDTO;
-    try {
-      lDTO = JSON.parse(msg.content.toString());
-    } catch (err) {
-      logutil.error('Error parsing message:\n' + err);
-      reject();
-      return;
+  let lDTO;
+  try {
+    lDTO = JSON.parse(msg.content.toString());
+  } catch (err) {
+    logutil.error('Error parsing message:\n' + err);
+    return;
+  }
+  if (
+    !Object.prototype.hasOwnProperty.call(lDTO, 'mac') ||
+    !Object.prototype.hasOwnProperty.call(lDTO, 'name')
+  ) {
+    logutil.warn('Bad DTO: ' + JSON.stringify(lDTO));
+    return;
+  }
+  models.Temperature.findOne({
+    where: {
+      mac: lDTO.mac
     }
-    if (
-      !Object.prototype.hasOwnProperty.call(lDTO, 'mac') ||
-      !Object.prototype.hasOwnProperty.call(lDTO, 'name')
-    ) {
-      logutil.warn('Bad DTO: ' + JSON.stringify(lDTO));
-      reject();
-      return;
-    }
-    models.Temperature.findOne({
-      where: {
-        mac: lDTO.mac
+  })
+    .then(lTemperature => {
+      if (lTemperature === null) {
+        models.Temperature.create(lDTO)
+          .then(() => {
+            logutil.info(
+              'Created temperature probe: ' + lDTO.name + ' with mac: ' + lDTO.mac
+            );
+          })
+          .catch(err => {
+            logutil.error('Error creating temperature probe:\n' + err);
+          });
+      } else {
+        logutil.warn('Probe already added: ' + lDTO.mac);
       }
     })
-      .then(lTemperature => {
-        if (lTemperature === null) {
-          models.Temperature.create(lDTO)
-            .then(() => {
-              logutil.info(
-                'Created temperature probe: ' + lDTO.name + ' with mac: ' + lDTO.mac
-              );
-              resolve();
-            })
-            .catch(err => {
-              logutil.error('Error creating temperature probe:\n' + err);
-              reject();
-            });
-        } else {
-          logutil.warn('Probe already added: ' + lDTO.mac);
-          reject();
-        }
-      })
-      .catch(err => {
-        logutil.error('Error saving temperatue:\n' + err);
-        reject();
-      });
-  });
+    .catch(err => {
+      logutil.error('Error saving temperature probe:\n' + err);
+    });
 }
 
 function handleNewReading(msg) {
-  return new Promise(function(resolve, reject) {
-    let lDTO = JSON.parse(msg.content.toString());
-    if (
-      !Object.prototype.hasOwnProperty.call(lDTO, 'mac') ||
-      !Object.prototype.hasOwnProperty.call(lDTO, 'value')
-    ) {
-      logutil.warn('Bad DTO: ' + JSON.stringify(lDTO));
-      reject();
-      return;
+  let lDTO = JSON.parse(msg.content.toString());
+  if (
+    !Object.prototype.hasOwnProperty.call(lDTO, 'mac') ||
+    !Object.prototype.hasOwnProperty.call(lDTO, 'value')
+  ) {
+    logutil.warn('Bad DTO: ' + JSON.stringify(lDTO));
+    return;
+  }
+  models.Temperature.findOne({
+    where: {
+      mac: lDTO.mac
     }
-    models.Temperature.findOne({
-      where: {
-        mac: lDTO.mac
+  })
+    .then(lTemperature => {
+      if (lTemperature === null) {
+        logutil.warn('Unknown temperature probe: ' + lDTO.mac);
+      } else if (lTemperature.value !== lDTO.value) {
+        lTemperature.update({ value: lDTO.value });
+        mq.send('temperature.v1.valuechanged', lTemperature.toDTO());
       }
     })
-      .then(lTemperature => {
-        if (lTemperature === null) {
-          logutil.warn('Unknown temperature probe: ' + lDTO.mac);
-          reject();
-        } else {
-          if (lTemperature.value !== lDTO.value) {
-            lTemperature.update({ value: lDTO.value });
-            mq.send('temperature.v1.valuechanged', lTemperature.toDTO());
-          }
-          resolve();
+    .catch(err => {
+      logutil.error('Error saving temperature:\n' + err);
+    });
+}
+
+function handleGetCurrent(msg) {
+  let lDTO = JSON.parse(msg.content.toString());
+  if (!Object.prototype.hasOwnProperty.call(lDTO, 'name')) {
+    logutil.warn('Bad DTO: ' + JSON.stringify(lDTO));
+    return;
+  }
+  models.Temperature.findOne({
+    where: {
+      name: lDTO.name
+    }
+  })
+    .then(lTemperature => {
+      if (lTemperature === null) {
+        logutil.warn('Unknown temperature probe: ' + lDTO.mac);
+      } else {
+        mq.send('temperature.v1.valuechanged', lTemperature.toDTO());
+      }
+    })
+    .catch(err => {
+      logutil.error('Error getting temperature:\n' + err);
+    });
+}
+
+function handleGetAllCurrent() {
+  models.Temperature.findAll({})
+    .then(lTemperatures => {
+      if (lTemperatures === null) {
+        logutil.warn('No temperature probes');
+      } else {
+        for (var i = 0; i < lTemperatures.length; i++) {
+          mq.send('temperature.v1.valuechanged', lTemperatures[i].toDTO());
         }
-      })
-      .catch(err => {
-        logutil.error('Error saving temperatue:\n' + err);
-        reject();
-      });
-  });
+      }
+    })
+    .catch(err => {
+      logutil.error('Error getting temperatures:\n' + err);
+    });
 }
 
 function startMQ() {
@@ -127,8 +150,10 @@ function startMQ() {
       .then(() => {
         console.log('MQ Connected');
         return Promise.all([
-          mq.recv('temperature', 'temperature.v1.createnew', handleCreateNew),
-          mq.recv('temperature', 'temperature.v1.reading', handleNewReading)
+          mq.recv('', 'temperature.v1.createnew', true, handleCreateNew),
+          mq.recv('', 'temperature.v1.reading', true, handleNewReading),
+          mq.recv('', 'temperature.v1.getcurrent', true, handleGetCurrent),
+          mq.recv('', 'temperature.v1.getallcurrent', true, handleGetAllCurrent)
         ]);
       })
       .then(() => {

@@ -22,18 +22,26 @@ exports.connect = function(host, exchange) {
   });
 };
 
-exports.recv = function(queuename, topic, callback) {
+exports.recv = function(queuename, topic, exclusive, callback) {
   return new Promise(function(resolve, reject) {
-    exports.channel
-      .assertQueue(queuename)
-      .then(q => {
-        return exports.channel.unbindQueue(q.queue, exports.exchange);
+    let channel;
+    exports.connection
+      .createChannel()
+      .then(ch => {
+        channel = ch;
+        return channel.assertExchange(exports.exchange, 'topic', { durable: true });
+      })
+      .then(() => {
+        return channel.assertQueue(queuename, { exclusive: exclusive });
       })
       .then(q => {
-        return exports.channel.bindQueue(q.queue, exports.exchange, topic);
+        return channel.unbindQueue(q.queue, exports.exchange);
       })
       .then(q => {
-        return exports.channel.consume(q.queue, callback, { noAck: true });
+        return channel.bindQueue(q.queue, exports.exchange, topic);
+      })
+      .then(q => {
+        return channel.consume(q.queue, callback, { noAck: true });
       })
       .then(ret => {
         resolve(ret);

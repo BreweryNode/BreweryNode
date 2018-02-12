@@ -75,11 +75,12 @@
   },
   "license": "GPL-3.0",
   "dependencies": {
+    "bluebird": "^3.5.1",
     "brewerynode-common": "../common",
     "dto": "0.0.1-biggms",
-    "sequelize-paper-trail": "2.0.0-biggms",
-    "bluebird": "^3.5.1",
     "mysql2": "^1.5.2",
-    "sequelize": "^4.33.3"
+    "sequelize": "^4.33.3",
+    "sequelize-paper-trail": "2.0.0-biggms",
+    "sequelize-version": "0.0.54"
   }
 }

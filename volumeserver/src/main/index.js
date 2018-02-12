@@ -59,7 +59,7 @@ function startMQ() {
       .connect(process.env.MQ_ADDRESS, 'amq.topic')
       .then(() => {
         console.log('MQ Connected');
-        return Promise.all([mq.recv('volume', 'volume.v1', handleNewReading)]);
+        return Promise.all([mq.recv('volume', 'volume.v1', true, handleNewReading)]);
       })
       .then(() => {
         console.log('MQ Listening');
