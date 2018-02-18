@@ -1,6 +1,5 @@
 const mq = require('./mq');
 const stackTrace = require('stack-trace');
-const path = require('path');
 
 exports.log = function(level, message) {
   let lLog = {};

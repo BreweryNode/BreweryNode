@@ -9,7 +9,7 @@ function startDB() {
     models = require('./models');
     console.log('Syncing database');
     models.sequelize
-      .sync({ force: false })
+      .sync({ force: true })
       .then(() => {
         console.log("Database sync'd");
         resolve();

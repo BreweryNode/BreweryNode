@@ -1,0 +1,9 @@
+require('./coolerhandler');
+require('./bubblerhandler');
+require('./flowhandler');
+require('./heaterhandler');
+require('./levelhandler');
+require('./pumphandler');
+require('./temperaturehandler');
+require('./volumehandler');
+require('./valvehandler');

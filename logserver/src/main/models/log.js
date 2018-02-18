@@ -13,8 +13,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.ENUM,
       values: ['error', 'warn', 'info', 'verbose', 'debug', 'silly']
     },
-    source: { type: DataTypes.STRING },
-    revision: { type: DataTypes.INTEGER, defaultValue: 0 }
+    source: { type: DataTypes.STRING }
   });
 
   Log.prototype.toDTO = function() {

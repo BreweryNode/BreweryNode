@@ -1,7 +1,7 @@
 {
-  "name": "brewerynode-logserver",
+  "name": "brewerynode-readingserver",
   "version": "0.0.1",
-  "description": "BreweryNode Logserver",
+  "description": "BreweryNode ReadingServer",
   "homepage": "",
   "author": {
     "name": "Graham Stewart",
@@ -9,9 +9,6 @@
     "url": ""
   },
   "files": ["src/main"],
-  "bin": {
-    "logserver": "./src/main/index.js"
-  },
   "main": "src/main/index.js",
   "keywords": [""],
   "devDependencies": {
@@ -27,10 +24,7 @@
     "nyc": "^11.4.1",
     "pkg": "^4.3.0",
     "prettier": "^1.7.0",
-    "uglifyjs-webpack-plugin": "^1.1.8",
-    "webpack": "^3.11.0",
-    "webpack-glob-entries": "^1.0.1",
-    "webpack-node-externals": "^1.6.0"
+    "uglifyjs-webpack-plugin": "^1.1.8"
   },
   "scripts": {
     "prepublish": "nsp check",
@@ -41,7 +35,7 @@
     "format:all": "prettier --write \"{src/main,src/test}/**/*.js\" \"!**/expected/**\"",
     "test-ci":
       "jest --config config.json --coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
-    "make-bin": "pkg -t node8-linux src/main/index.js  -o bin/brewerynode_logserver"
+    "make-bin": "pkg -t node8-linux src/main/index.js  -o bin/brewerynode_deviceserver"
   },
   "lint-staged": {
     "*.js": ["eslint --fix", "git add"],
@@ -70,13 +64,12 @@
   },
   "license": "GPL-3.0",
   "dependencies": {
-    "babel-loader": "^7.1.2",
     "bluebird": "^3.5.1",
     "brewerynode-common": "../common",
     "dto": "0.0.1-biggms",
-    "pg": "^7.4.1",
+    "mysql2": "^1.5.2",
     "sequelize": "^4.33.3",
     "sequelize-paper-trail": "2.0.0-biggms",
-    "winston": "^2.4.0"
+    "sequelize-version": "0.0.54"
   }
 }
