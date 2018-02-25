@@ -7,11 +7,47 @@ function createNew(model, dto) {
     sensorutil
       .createNew(model, dto)
       .then(instance => {
-        model.getSetHistoryModel().createNew(model, instance);
+        return model.getSetHistoryModel().createNew(model, instance);
+      })
+      .then(() => {
+        resolve();
       })
       .catch(err => {
         reject(err);
       });
+  });
+}
+
+function instanceReading(model, dto, instance) {
+  return new Promise(function(resolve, reject) {
+    sensorutil
+      .instanceReading(model, dto, instance)
+      .then(() => {
+        return instance.checkRequestedChanged(model, dto);
+      })
+      .then(() => {
+        resolve();
+      })
+      .catch(err => {
+        reject(err);
+      });
+  });
+}
+
+function checkRequestedChanged(model, dto, instance) {
+  return new Promise(function(resolve) {
+    if (model.doCompare(instance.value, instance.requestedValue)) {
+      resolve();
+    } else {
+      mq
+        .send(
+          model.getName() + '.' + dto.name + '.set',
+          JSON.stringify({ value: instance.requestedValue })
+        )
+        .then(() => {
+          resolve();
+        });
+    }
   });
 }
 
@@ -44,6 +80,9 @@ function requestSet(model, dto) {
           return record.requestSet(model, dto);
         }
       })
+      .then(() => {
+        resolve();
+      })
       .catch(err => {
         logutil.error('Error saving ' + model.getName() + ':\n' + err);
         reject();
@@ -53,17 +92,22 @@ function requestSet(model, dto) {
 
 function instanceRequestSet(model, dto, instance) {
   return new Promise(function(resolve, reject) {
-    if (model.doCompare(instance.value, dto.value)) {
+    if (model.doCompare(instance.requestedValue, dto.value)) {
       resolve();
     } else {
       instance
         .update({ requestedValue: dto.value })
         .then(() => {
-          mq.send(
+          return model.getSetHistoryModel().createNew(model, instance);
+        })
+        .then(() => {
+          return mq.send(
             model.getName() + '.' + dto.name + '.set',
             JSON.stringify({ value: dto.value })
           );
-          return model.getSetHistoryModel().createNew(model, instance);
+        })
+        .then(() => {
+          resolve();
         })
         .catch(err => {
           reject(err);
@@ -76,5 +120,7 @@ module.exports = {
   createNewSetHistory: createNewSetHistory,
   createNew: createNew,
   requestSet: requestSet,
-  instanceRequestSet: instanceRequestSet
+  instanceRequestSet: instanceRequestSet,
+  instanceReading: instanceReading,
+  checkRequestedChanged: checkRequestedChanged
 };

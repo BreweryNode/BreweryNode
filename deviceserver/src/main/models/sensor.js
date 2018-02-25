@@ -5,7 +5,7 @@ const messageutil = require('brewerynode-common').messageutil;
 
 function createSensor(sequelize, DataTypes, config) {
   let SensorHistory;
-  var Sensor = sequelize.define(config.name, {
+  let fields = {
     id: {
       type: DataTypes.UUID,
       primaryKey: true,
@@ -13,7 +13,13 @@ function createSensor(sequelize, DataTypes, config) {
     },
     name: { type: DataTypes.STRING, allowNull: false, unique: true },
     value: { type: config.valueType, defaultValue: config.defaultValue }
-  });
+  };
+
+  if (!Object.prototype.hasOwnProperty.call(config, 'fields')) {
+    config.fields = {};
+  }
+
+  var Sensor = sequelize.define(config.name, Object.assign(fields, config.fields));
 
   Sensor.createNew = sensorutil.createNew;
   Sensor.search = sensorutil.search;

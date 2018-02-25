@@ -24,6 +24,11 @@ function handleMessage(model, msg) {
     case 'gethistory': {
       return model.getHistoryModel().getHistory(model, model.getHistoryModel(), dto);
     }
+    case 'getsethistory': {
+      return model
+        .getSetHistoryModel()
+        .getHistory(model, model.getSetHistoryModel(), dto);
+    }
     case 'valuechanged': {
       return new Promise(function(resolve) {
         resolve();

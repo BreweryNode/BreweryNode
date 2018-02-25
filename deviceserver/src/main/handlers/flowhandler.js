@@ -1,16 +1,21 @@
 const mq = require('brewerynode-common').mq;
 const logutil = require('brewerynode-common').logutil;
-const deviceutil = require('brewerynode-common').deviceutil;
-const models = require('../models');
+const flow = require('../models').Flow;
 
 function handleMessage(msg) {
-  let dto = JSON.parse(msg.content.toString());
-  deviceutil.handleMessage(
-    { name: 'flow', number: false, mutator: false },
-    msg,
-    dto,
-    models.Flow
-  );
+  flow
+    .handleMessage(msg)
+    .then(() => {})
+    .catch(err => {
+      console.log(
+        'Error handling message: "' +
+          msg.fields.routingKey +
+          '" : "' +
+          msg.content.toString() +
+          '" : ' +
+          err
+      );
+    });
 }
 
 function registerMQ() {
@@ -18,12 +23,17 @@ function registerMQ() {
   return mq.recv('flow', 'flow.v1.#', false, handleMessage);
 }
 
+function createTestData() {
+  return Promise.all([
+    flow.createNew(flow, { name: 'Warm Water' }),
+    flow.createNew(flow, { name: 'Cold Water' }),
+    flow.createNew(flow, { name: 'Boiler' })
+  ]);
+}
+
 async function main() {
   await registerMQ();
-
-  mq.send('flow.v1.createnew', JSON.stringify({ name: 'Warm Water' }));
-  mq.send('flow.v1.createnew', JSON.stringify({ name: 'Cold Water' }));
-  mq.send('flow.v1.createnew', JSON.stringify({ name: 'Boiler' }));
+  await createTestData();
 }
 
 main();

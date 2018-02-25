@@ -24,7 +24,7 @@ function registerMQ() {
 }
 
 function createTestData() {
-  return bubbler.createNew(bubbler, { name: 'Fermenter' });
+  return Promise.all([bubbler.createNew(bubbler, { name: 'Fermenter' })]);
 }
 
 async function main() {

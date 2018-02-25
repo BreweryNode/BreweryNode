@@ -1,23 +1,12 @@
 'use strict';
-var dto = require('dto');
+const mutator = require('./mutator');
 
 module.exports = (sequelize, DataTypes) => {
-  var Flow = sequelize.define('Cooler', {
-    id: {
-      type: DataTypes.UUID,
-      primaryKey: true,
-      defaultValue: DataTypes.UUIDV4
-    },
-    name: { type: DataTypes.STRING, allowNull: false, unique: true },
-    value: { type: DataTypes.BOOLEAN, defaultValue: false },
-    requestedValue: { type: DataTypes.BOOLEAN, defaultValue: false }
+  let Cooler = mutator.createMutator(sequelize, DataTypes, {
+    name: 'Cooler',
+    valueType: DataTypes.BOOLEAN,
+    defaultValue: false,
+    comparison: 'boolean'
   });
-
-  Flow.prototype.toDTO = function() {
-    return JSON.stringify(
-      dto.take.only(this.dataValues, ['name', 'value', 'requestedValue'])
-    );
-  };
-
-  return Flow;
+  return Cooler;
 };

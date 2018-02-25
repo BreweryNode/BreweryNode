@@ -148,9 +148,10 @@ function getHistory(model, historyModel, dto) {
 }
 
 function doCompare(val1, val2, type) {
+  console.log('Comparing ' + val1 + ' to: ' + val2 + ' of type: ' + type);
   switch (type) {
     case 'boolean': {
-      return Boolean(val1) === Boolean(val2);
+      return String(val1) === String(val2);
     }
     case 'number': {
       return Number(val1) === Number(val2);
@@ -167,14 +168,19 @@ function instanceReading(model, dto, instance) {
       instance
         .update({ value: dto.value })
         .then(() => {
-          model.getHistoryModel().createNew(model, instance);
-          mq.send(model.getName() + '.v1.valuechanged', instance.toDTO());
+          return mq.send(model.getName() + '.v1.valuechanged', instance.toDTO());
+        })
+        .then(() => {
+          return model.getHistoryModel().createNew(model, instance);
+        })
+        .then(() => {
           resolve();
         })
         .catch(err => {
           reject(err);
         });
     }
+    resolve();
   });
 }
 

@@ -1,16 +1,21 @@
 const mq = require('brewerynode-common').mq;
 const logutil = require('brewerynode-common').logutil;
-const deviceutil = require('brewerynode-common').deviceutil;
-const models = require('../models');
+const level = require('../models').Level;
 
 function handleMessage(msg) {
-  let dto = JSON.parse(msg.content.toString());
-  deviceutil.handleMessage(
-    { name: 'level', number: false, mutator: false },
-    msg,
-    dto,
-    models.Level
-  );
+  level
+    .handleMessage(msg)
+    .then(() => {})
+    .catch(err => {
+      console.log(
+        'Error handling message: "' +
+          msg.fields.routingKey +
+          '" : "' +
+          msg.content.toString() +
+          '" : ' +
+          err
+      );
+    });
 }
 
 function registerMQ() {
@@ -18,11 +23,16 @@ function registerMQ() {
   return mq.recv('level', 'level.v1.#', false, handleMessage);
 }
 
+function createTestData() {
+  return Promise.all([
+    level.createNew(level, { name: 'Warm Water' }),
+    level.createNew(level, { name: 'Cold Water' })
+  ]);
+}
+
 async function main() {
   await registerMQ();
-
-  mq.send('level.v1.createnew', JSON.stringify({ name: 'Warm Water' }));
-  mq.send('level.v1.createnew', JSON.stringify({ name: 'Cold Water' }));
+  await createTestData();
 }
 
 main();

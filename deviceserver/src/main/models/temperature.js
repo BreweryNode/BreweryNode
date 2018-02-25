@@ -1,16 +1,26 @@
 'use strict';
-var dto = require('dto');
+const sensor = require('./sensor');
+const sensorutil = require('brewerynode-common').sensorutil;
 
 module.exports = (sequelize, DataTypes) => {
-  var Temperature = sequelize.define('Temperature', {
-    id: { type: DataTypes.UUID, primaryKey: true, defaultValue: DataTypes.UUIDV4 },
-    name: { type: DataTypes.STRING, allowNull: false, unique: true },
-    mac: { type: DataTypes.STRING, allowNull: false, unique: true },
-    value: { type: DataTypes.DOUBLE, defaultValue: 0 }
+  let Temperature = sensor.createSensor(sequelize, DataTypes, {
+    name: 'Temperature',
+    valueType: DataTypes.DOUBLE,
+    defaultValue: 0,
+    comparison: 'number',
+    fields: { mac: { type: DataTypes.STRING, allowNull: false, unique: true } }
   });
 
-  Temperature.prototype.toDTO = function() {
-    return JSON.stringify(dto.take.only(this.dataValues, ['name', 'value']));
+  Temperature.single.search = function(model, dto) {
+    if (Object.prototype.hasOwnProperty.call(dto, 'mac')) {
+      console.log('Looking for ' + model.getName() + ': ' + dto.name);
+      return model.findOne({
+        where: {
+          mac: dto.mac
+        }
+      });
+    }
+    return sensorutil.search(model, dto);
   };
 
   return Temperature;

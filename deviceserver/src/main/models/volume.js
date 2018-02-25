@@ -1,20 +1,12 @@
 'use strict';
-var dto = require('dto');
+const sensor = require('./sensor');
 
 module.exports = (sequelize, DataTypes) => {
-  var Volume = sequelize.define('Volume', {
-    id: {
-      type: DataTypes.UUID,
-      primaryKey: true,
-      defaultValue: DataTypes.UUIDV4
-    },
-    name: { type: DataTypes.STRING, allowNull: false, unique: true },
-    value: { type: DataTypes.DOUBLE, defaultValue: 0 }
+  let Volume = sensor.createSensor(sequelize, DataTypes, {
+    name: 'Volume',
+    valueType: DataTypes.DOUBLE,
+    defaultValue: 0,
+    comparison: 'number'
   });
-
-  Volume.prototype.toDTO = function() {
-    return JSON.stringify(dto.take.only(this.dataValues, ['name', 'value']));
-  };
-
   return Volume;
 };

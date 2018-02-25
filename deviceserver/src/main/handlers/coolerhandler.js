@@ -1,16 +1,21 @@
 const mq = require('brewerynode-common').mq;
 const logutil = require('brewerynode-common').logutil;
-const deviceutil = require('brewerynode-common').deviceutil;
-const models = require('../models');
+const cooler = require('../models').Cooler;
 
 function handleMessage(msg) {
-  let dto = JSON.parse(msg.content.toString());
-  deviceutil.handleMessage(
-    { name: 'cooler', number: false, mutator: true },
-    msg,
-    dto,
-    models.Cooler
-  );
+  cooler
+    .handleMessage(msg)
+    .then(() => {})
+    .catch(err => {
+      console.log(
+        'Error handling message: "' +
+          msg.fields.routingKey +
+          '" : "' +
+          msg.content.toString() +
+          '" : ' +
+          err
+      );
+    });
 }
 
 function registerMQ() {
@@ -18,10 +23,13 @@ function registerMQ() {
   return mq.recv('cooler', 'cooler.v1.#', false, handleMessage);
 }
 
+function createTestData() {
+  return Promise.all([cooler.createNew(cooler, { name: 'Fermenter' })]);
+}
+
 async function main() {
   await registerMQ();
-
-  mq.send('cooler.v1.createnew', JSON.stringify({ name: 'Fermenter' }));
+  await createTestData();
 }
 
 main();

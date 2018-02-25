@@ -11,26 +11,44 @@ if (config.use_env_variable) {
 }
 
 let model = sequelize.import('cooler', require('./cooler'));
-db.Cooler = model;
+db.Cooler = model.single;
+db.CoolerHistory = model.history;
+db.CoolerSetHistory = model.setHistory;
+
 model = sequelize.import('bubbler', require('./bubbler'));
 db.Bubbler = model.single;
 db.BubblerHistory = model.history;
+
 model = sequelize.import('flow', require('./flow'));
-db.Flow = model;
+db.Flow = model.single;
+db.FlowHistory = model.history;
+
 model = sequelize.import('heater', require('./heater'));
-db.Heater = model;
+db.Heater = model.single;
+db.HeaterHistory = model.history;
+db.HeaterSetHistory = model.setHistory;
+
 model = sequelize.import('level', require('./level'));
-db.Level = model;
+db.Level = model.single;
+db.LevelHistory = model.history;
+
 model = sequelize.import('pump', require('./pump'));
-db.Pump = model;
+db.Pump = model.single;
+db.PumpHistory = model.history;
+db.PumpSetHistory = model.setHistory;
+
 model = sequelize.import('temperature', require('./temperature'));
-db.Temperature = model;
-model = sequelize.import('volume', require('./volume'));
-db.Volume = model;
+db.Temperature = model.single;
+db.TemperatureHistory = model.history;
+
 model = sequelize.import('valve', require('./valve'));
 db.Valve = model.single;
 db.ValveHistory = model.history;
 db.ValveSetHistory = model.setHistory;
+
+model = sequelize.import('volume', require('./volume'));
+db.Volume = model.single;
+db.VolumeHistory = model.history;
 
 Object.keys(db).forEach(function(modelName) {
   if (db[modelName].associate) {
