@@ -9,6 +9,7 @@ exports.log = function(level, message) {
   let filename = trace.getFileName().split('/src/main');
   let modulename = filename[0].slice(filename[0].lastIndexOf('/') + 1);
   lLog.source = modulename + ':' + filename[1].slice(1) + ':' + trace.getLineNumber();
+  console.log(JSON.stringify(lLog));
   return mq.send('logging.v1.' + level, JSON.stringify(lLog));
 };
 

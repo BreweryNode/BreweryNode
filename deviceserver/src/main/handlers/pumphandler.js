@@ -89,7 +89,7 @@ function handleSet(msg) {
     .then(lPump => {
       if (lPump === null) {
         logutil.warn('Unknown pump: ' + lDTO.name);
-      } else if (lPump.value !== lDTO.requestedValue) {
+      } else if (lPump.requestedValue !== lDTO.value) {
         lPump.update({ requestedValue: lDTO.value });
         mq.send('pump.' + lDTO.name + '.set', JSON.stringify({ value: lDTO.value }));
       }
@@ -162,8 +162,11 @@ function handleMessage(message) {
       handleGetAllCurrent(message);
       break;
     }
+    case 'valuechanged': {
+      break;
+    }
     default: {
-      logutil.warn('Unknown pump nesssage' + message.fields.routingKey);
+      logutil.warn('Unknown pump nesssage: ' + message.fields.routingKey);
       break;
     }
   }
@@ -178,7 +181,7 @@ async function main() {
   await registerMQ();
 
   mq.send('pump.v1.createnew', JSON.stringify({ name: 'Cold Water' }));
-  mq.send('pump.v1.createnew', JSON.stringify({ name: 'Warn Water' }));
+  mq.send('pump.v1.createnew', JSON.stringify({ name: 'Warm Water' }));
   mq.send('pump.v1.createnew', JSON.stringify({ name: 'Boiler' }));
   mq.send('pump.v1.createnew', JSON.stringify({ name: 'Agitator' }));
 }

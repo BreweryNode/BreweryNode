@@ -1,10 +1,10 @@
 {
   "development": {
-    "username": "test",
-    "password": "test",
-    "database": "test",
-    "host": "127.0.0.1",
-    "dialect": "mysql",
+    "username": "lambdatest",
+    "password": "Canopy18*",
+    "database": "lambdatest",
+    "host": "lambdatest.c0avxpaeaprw.eu-central-1.rds.amazonaws.com",
+    "dialect": "postgres",
     "pool": {
       "max": 5,
       "min": 0,
@@ -15,7 +15,7 @@
       "updatedAt": false,
       "freezeTableName": true
     },
-    "logging" : false
+    "logging": true
   },
   "test": {
     "username": "root",

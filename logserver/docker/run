@@ -1,2 +1,2 @@
 #!/bin/sh
-exec /usr/local/bin/brewerynode >>/var/log/brewerynode.log 2>&1
+exec /usr/local/bin/brewerynode

@@ -1,9 +1,11 @@
+#!/usr/bin/env node
 var Promise = require('bluebird');
 var models;
 let mq = require('brewerynode-common').mq;
 var logutil = require('brewerynode-common').logutil;
 var winston = require('winston');
 
+// Create a server object:
 function startDB() {
   return new Promise(function(resolve, reject) {
     models = require('./models');

@@ -13,7 +13,8 @@ if (config.use_env_variable) {
 let model = sequelize.import('cooler', require('./cooler'));
 db.Cooler = model;
 model = sequelize.import('bubbler', require('./bubbler'));
-db.Bubbler = model;
+db.Bubbler = model.single;
+db.BubblerHistory = model.history;
 model = sequelize.import('flow', require('./flow'));
 db.Flow = model;
 model = sequelize.import('heater', require('./heater'));
@@ -27,7 +28,9 @@ db.Temperature = model;
 model = sequelize.import('volume', require('./volume'));
 db.Volume = model;
 model = sequelize.import('valve', require('./valve'));
-db.Valve = model;
+db.Valve = model.single;
+db.ValveHistory = model.history;
+db.ValveSetHistory = model.setHistory;
 
 Object.keys(db).forEach(function(modelName) {
   if (db[modelName].associate) {

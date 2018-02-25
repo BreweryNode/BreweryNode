@@ -1,6 +1,7 @@
 const mq = require('brewerynode-common').mq;
 const logutil = require('brewerynode-common').logutil;
 const models = require('../models');
+const functions = require('./functions');
 
 function handleCreateNew(msg) {
   let lDTO;
@@ -59,7 +60,7 @@ function handleNewReading(msg) {
     .then(lTemperature => {
       if (lTemperature === null) {
         logutil.warn('Unknown temperature probe: ' + lDTO.mac);
-      } else if (lTemperature.value !== lDTO.value) {
+      } else if (lTemperature.value !== Number(lDTO.value)) {
         lTemperature.update({ value: lDTO.value });
         mq.send('temperature.v1.valuechanged', lTemperature.toDTO());
       }
@@ -128,8 +129,11 @@ function handleMessage(message) {
       handleGetAllCurrent(message);
       break;
     }
+    case 'valuechanged': {
+      break;
+    }
     default: {
-      logutil.warn('Unknown temperature nesssage' + message.fields.routingKey);
+      logutil.warn('Unknown temperature nesssage: ' + message.fields.routingKey);
       break;
     }
   }

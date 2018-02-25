@@ -1,7 +1,7 @@
 {
-  "name": "brewerynode-volumeserver",
+  "name": "brewerynode-brewaryserver",
   "version": "0.0.1",
-  "description": "BreweryNode VolumeServer",
+  "description": "BreweryNode BreweryServer",
   "homepage": "",
   "author": {
     "name": "Graham Stewart",
@@ -26,7 +26,9 @@
     "lint-staged": "^4.2.1",
     "nsp": "^2.6.3",
     "nyc": "^11.4.1",
-    "prettier": "^1.7.0"
+    "pkg": "^4.3.0",
+    "prettier": "^1.7.0",
+    "uglifyjs-webpack-plugin": "^1.1.8"
   },
   "scripts": {
     "prepublish": "nsp check",
@@ -35,7 +37,8 @@
     "test": "jest",
     "format": "prettier --write",
     "format:all": "prettier --write \"{src/main,src/test}/**/*.js\" \"!**/expected/**\"",
-    "test-ci": "jest --config config.json --coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
+    "test-ci": "jest --config config.json --coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
+    "make-bin": "pkg -t node8-linux src/main/index.js  -o bin/brewerynode_breweryserver"
   },
   "lint-staged": {
     "*.js": [
@@ -75,11 +78,13 @@
   },
   "license": "GPL-3.0",
   "dependencies": {
-    "brewerynode-common": "../common",
-    "dto": "0.0.1-biggms",
-    "sequelize-paper-trail": "2.0.0-biggms",
     "bluebird": "^3.5.1",
+    "brewerynode-common": "../common",
+    "brewerynode-deviceserver": "../deviceserver",
+    "dto": "0.0.1-biggms",
     "mysql2": "^1.5.2",
-    "sequelize": "^4.33.3"
+    "sequelize": "^4.33.3",
+    "sequelize-paper-trail": "2.0.0-biggms",
+    "sequelize-version": "0.0.54"
   }
 }

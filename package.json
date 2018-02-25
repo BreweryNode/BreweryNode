@@ -23,6 +23,7 @@
     "prettier": "^1.7.0"
   },
   "scripts": {
+    "start": "node logserver/src/main/index.js",
     "prepublish": "nsp check",
     "pretest": "eslint .",
     "precommit": "lint-staged",
