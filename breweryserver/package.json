@@ -85,6 +85,8 @@
     "mysql2": "^1.5.2",
     "sequelize": "^4.33.3",
     "sequelize-paper-trail": "2.0.0-biggms",
-    "sequelize-version": "0.0.54"
+    "sequelize-version": "0.0.54",
+    "winston": "^3.0.0-rc1",
+    "async-each": "^1.0.1"
   }
 }

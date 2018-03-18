@@ -1,42 +1,32 @@
+const winston = require('winston');
 const mq = require('brewerynode-common').mq;
-const logutil = require('brewerynode-common').logutil;
 const valve = require('../models').Valve;
 
 function handleMessage(msg) {
-  valve
-    .handleMessage(msg)
-    .then(() => {})
-    .catch(err => {
-      console.log(
-        'Error handling message: "' +
-          msg.fields.routingKey +
-          '" : "' +
-          msg.content.toString() +
-          '" : ' +
-          err
-      );
-    });
+  valve.handleMessage(msg);
 }
 
 function registerMQ() {
-  logutil.silly('Registering valve handlers');
+  winston.silly('Registering valve handlers');
   return mq.recv('valve', 'valve.v1.#', false, handleMessage);
 }
 
 function createTestData() {
   return Promise.all([
-    valve.createNew(valve, { name: 'Warm Water Input' }),
-    valve.createNew(valve, { name: 'Warm Water Output' }),
-    valve.createNew(valve, { name: 'Cold Water Input' }),
-    valve.createNew(valve, { name: 'Cold Water Output' }),
-    valve.createNew(valve, { name: 'Mains Water Input' }),
-    valve.createNew(valve, { name: 'Mains Water Output' })
+    valve.createNew({ name: 'Warm Water Input' }),
+    valve.createNew({ name: 'Warm Water Output' }),
+    valve.createNew({ name: 'Cold Water Input' }),
+    valve.createNew({ name: 'Cold Water Output' }),
+    valve.createNew({ name: 'Mains Water Input' }),
+    valve.createNew({ name: 'Mains Water Output' })
   ]);
 }
 
 async function main() {
   await registerMQ();
   await createTestData();
+
+  mq.send('valve.v1.reading', JSON.stringify({ name: 'Fermenter', value: true }));
 }
 
 main();

@@ -1,12 +1,38 @@
-'use strict';
-const sensor = require('./sensor');
+const commonmodels = require('brewerynode-common').models;
+const winston = require('winston');
+const functions = require('brewerynode-common').models.functions;
+const lockutils = require('brewerynode-common').lockutils;
 
-module.exports = (sequelize, DataTypes) => {
-  let Level = sensor.createSensor(sequelize, DataTypes, {
+let extraModels = [commonmodels.base, commonmodels.sensor];
+
+function defineTable(sequelize, DataTypes) {
+  let config = {
     name: 'Level',
     valueType: DataTypes.BOOLEAN,
-    defaultValue: false,
-    comparison: 'boolean'
-  });
-  return Level;
+    defaultValue: 0
+  };
+  return functions.defineTable(sequelize, DataTypes, config, extraModels);
+}
+
+module.exports = (sequelize, DataTypes) => {
+  let Level = defineTable(sequelize, DataTypes);
+  functions.defineDTO(Level, extraModels);
+  functions.defineVersions(Level, extraModels);
+  functions.addMessageHandlers(Level, extraModels);
+
+  Level.handleMessage = async function(msg) {
+    let dto = JSON.parse(msg.content.toString());
+    winston.info(
+      'Handling message: "' + msg.fields.routingKey + '" : "' + msg.content.toString()
+    );
+
+    let key = msg.fields.routingKey.slice(msg.fields.routingKey.lastIndexOf('.') + 1);
+    Level.messageHandlers[key](dto);
+  };
+
+  Level.doCompare = functions.booleanCompare;
+
+  lockutils.lockHook(Level);
+
+  return { single: Level };
 };

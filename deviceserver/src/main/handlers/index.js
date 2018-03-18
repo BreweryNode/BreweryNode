@@ -5,5 +5,5 @@ require('./heaterhandler');
 require('./levelhandler');
 require('./pumphandler');
 require('./temperaturehandler');
-require('./volumehandler');
 require('./valvehandler');
+require('./volumehandler');

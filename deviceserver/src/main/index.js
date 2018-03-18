@@ -1,48 +1,44 @@
-const Promise = require('bluebird');
 var models;
 let mq = require('brewerynode-common').mq;
-var logutil = require('brewerynode-common').logutil;
+const winston = require('winston');
+global.Promise = require('bluebird');
 
-function startDB() {
-  return new Promise(function(resolve, reject) {
+async function startDB() {
+  try {
     models = require('./models');
-    logutil.silly('Syncing database');
-    models.sequelize
-      .sync({ force: true })
-      .then(() => {
-        logutil.silly("Database sync'd");
-        resolve();
-      })
-      .catch(err => {
-        logutil.warn(err);
-        reject(err);
-      });
-  });
+    winston.silly('Syncing database');
+    await models.sequelize.sync({ force: true });
+    winston.silly("Database sync'd");
+  } catch (err) {
+    winston.error(err);
+  }
 }
 
-function startMQ() {
-  return new Promise(function(resolve, reject) {
-    console.log('Connecting to MQ');
-    mq
-      .connect(process.env.MQ_ADDRESS, 'amq.topic')
-      .then(() => {
-        console.log('MQ Connected');
-        resolve();
-      })
-      .catch(err => {
-        console.warn(err);
-        reject(err);
-      });
-  });
+async function startMQ() {
+  try {
+    winston.info('Connecting to MQ');
+    await mq.connect(process.env.MQ_ADDRESS, 'amq.topic');
+    winston.info('MQ Connected');
+  } catch (err) {
+    winston.error(err);
+  }
 }
 
 async function main() {
-  console.log('Starting');
+  winston.info('Starting');
   await startMQ();
   await startDB();
-  logutil.info('Starting handlers');
+  winston.info('Starting handlers');
   require('./handlers');
-  logutil.info('Reading server started');
+  winston.info('Reading server started');
 }
+
+const console = new winston.transports.Console({ level: 'silly' });
+winston.add(console);
+
+process.on('unhandledRejection', (reason, p) => {
+  winston.error('Unhandled Rejection at: Promise' + p + 'reason:' + reason);
+  // Application specific logging, throwing an error, or other logic here
+});
 
 main();

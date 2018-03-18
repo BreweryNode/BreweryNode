@@ -1,30 +1,18 @@
+const winston = require('winston');
 const mq = require('brewerynode-common').mq;
-const logutil = require('brewerynode-common').logutil;
 const bubbler = require('../models').Bubbler;
 
 function handleMessage(msg) {
-  bubbler
-    .handleMessage(msg)
-    .then(() => {})
-    .catch(err => {
-      console.log(
-        'Error handling message: "' +
-          msg.fields.routingKey +
-          '" : "' +
-          msg.content.toString() +
-          '" : ' +
-          err
-      );
-    });
+  bubbler.handleMessage(msg);
 }
 
 function registerMQ() {
-  logutil.silly('Registering bubbler handlers');
+  winston.silly('Registering bubbler handlers');
   return mq.recv('bubbler', 'bubbler.v1.#', false, handleMessage);
 }
 
 function createTestData() {
-  return Promise.all([bubbler.createNew(bubbler, { name: 'Fermenter' })]);
+  return Promise.all([bubbler.createNew({ name: 'Fermenter' })]);
 }
 
 async function main() {

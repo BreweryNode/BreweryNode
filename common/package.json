@@ -77,7 +77,13 @@
   "dependencies": {
     "amqplib": "^0.5.2",
     "bluebird": "^3.5.1",
+    "redis": "^2.8.0",
+    "redlock": "^3.1.1",
     "lodash.merge": "^4.6.1",
-    "stack-trace": "^0.0.10"
+    "sequelize": "^4.33.3",
+    "sequelize-version": "0.0.54",
+    "stack-trace": "^0.0.10",
+    "dto": "0.0.1-biggms",
+    "winston": "^3.0.0-rc1"
   }
 }

@@ -1,10 +1,10 @@
 {
   "development": {
-    "username": "lambdatest",
-    "password": "Canopy18*",
-    "database": "lambdatest",
-    "host": "lambdatest.c0avxpaeaprw.eu-central-1.rds.amazonaws.com",
-    "dialect": "postgres",
+    "username": "brewerynode",
+    "password": "Boldlygo49*",
+    "database": "brewerynode",
+    "host": "brewerynode.ci1fwkpynnfg.eu-west-1.rds.amazonaws.com",
+    "dialect": "mysql",
     "pool": {
       "max": 5,
       "min": 0,
@@ -15,7 +15,7 @@
       "updatedAt": false,
       "freezeTableName": true
     },
-    "logging": true
+    "logging": "console.log"
   },
   "test": {
     "username": "root",

@@ -1,38 +1,29 @@
+const winston = require('winston');
 const mq = require('brewerynode-common').mq;
-const logutil = require('brewerynode-common').logutil;
 const level = require('../models').Level;
 
 function handleMessage(msg) {
-  level
-    .handleMessage(msg)
-    .then(() => {})
-    .catch(err => {
-      console.log(
-        'Error handling message: "' +
-          msg.fields.routingKey +
-          '" : "' +
-          msg.content.toString() +
-          '" : ' +
-          err
-      );
-    });
+  level.handleMessage(msg);
 }
 
 function registerMQ() {
-  logutil.silly('Registering level handlers');
+  winston.silly('Registering level handlers');
   return mq.recv('level', 'level.v1.#', false, handleMessage);
 }
 
 function createTestData() {
   return Promise.all([
-    level.createNew(level, { name: 'Warm Water' }),
-    level.createNew(level, { name: 'Cold Water' })
+    level.createNew({ name: 'Warm Water' }),
+    level.createNew({ name: 'Cold Water' }),
+    level.createNew({ name: 'Boiler' })
   ]);
 }
 
 async function main() {
   await registerMQ();
   await createTestData();
+
+  mq.send('level.v1.reading', JSON.stringify({ name: 'Cold Water', value: true }));
 }
 
 main();

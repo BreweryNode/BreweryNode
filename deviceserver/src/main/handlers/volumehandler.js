@@ -1,30 +1,18 @@
 const mq = require('brewerynode-common').mq;
-const logutil = require('brewerynode-common').logutil;
+const winston = require('winston');
 const volume = require('../models').Volume;
 
 function handleMessage(msg) {
-  volume
-    .handleMessage(msg)
-    .then(() => {})
-    .catch(err => {
-      console.log(
-        'Error handling message: "' +
-          msg.fields.routingKey +
-          '" : "' +
-          msg.content.toString() +
-          '" : ' +
-          err
-      );
-    });
+  volume.handleMessage(msg);
 }
 
 function registerMQ() {
-  logutil.silly('Registering volume handlers');
+  winston.silly('Registering volume handlers');
   return mq.recv('volume', 'volume.v1.#', false, handleMessage);
 }
 
 function createTestData() {
-  return Promise.all([volume.createNew(volume, { name: 'Fermenter' })]);
+  return Promise.all([volume.createNew({ name: 'Fermenter' })]);
 }
 
 async function main() {
