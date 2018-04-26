@@ -45,8 +45,9 @@ exports.addMethods = function(dbClass, config) {
   };
 
   dbClass.lockById = async function(id) {
-    winston.silly('Locking id: ' + id);
-    let mutex = await lockutils.lock(id, 1000);
+    //    Winston.silly('Locking ' + dbClass.getName() + ' id: ' + id);
+    let mutex = await lockutils.lock(id, 10000);
+    //    Winston.silly('Locked ' + dbClass.getName() + ' id: ' + id);
     let record = await dbClass.findOne({
       where: {
         id: id
@@ -57,15 +58,15 @@ exports.addMethods = function(dbClass, config) {
   };
 
   dbClass.lockByModel = async function(model) {
-    winston.silly('Locking id: ' + model.id);
-    let mutex = await lockutils.lock(model.id, 1000);
-    let record = await dbClass.findOne({
-      where: {
-        id: model.id
-      }
-    });
-    record.mutex = mutex;
-    return record;
+    return dbClass.lockById(model.id);
+  };
+
+  dbClass.unlock = async function(record) {
+    //    Winston.silly('Unlocking ' + dbClass.getName() + ' id: ' + record.id);
+    let lock = record.mutex;
+    record.mutex = null;
+    lockutils.unlock(lock);
+    //    Winston.silly('Unlocked ' + dbClass.getName() + ' id: ' + record.id);
   };
 
   dbClass.find = function(dto, lock) {
@@ -77,7 +78,7 @@ exports.addMethods = function(dbClass, config) {
   };
 
   dbClass.findById = async function(dto, lock) {
-    winston.silly('Searching by id for: ' + dto.id + ' lock: ' + lock);
+    //    Winston.silly('Searching by id for: ' + dto.id + ' lock: ' + lock);
     if (lock) {
       let record = await dbClass.findOne({
         where: {
@@ -100,7 +101,7 @@ exports.addMethods = function(dbClass, config) {
   };
 
   dbClass.findByName = async function(dto, lock) {
-    winston.silly('Searching by name for: ' + dto.name + ' lock: ' + lock);
+    //    Winston.silly('Searching by name for: ' + dto.name + ' lock: ' + lock);
     if (lock) {
       let record = await dbClass.findOne({
         where: {

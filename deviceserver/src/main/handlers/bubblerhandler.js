@@ -19,7 +19,7 @@ async function main() {
   await registerMQ();
   await createTestData();
 
-  mq.send('bubbler.v1.reading', JSON.stringify({ name: 'Fermenter', value: 3 }));
+  //  Mq.send('bubbler.v1.reading', JSON.stringify({ name: 'Fermenter', value: 3 }));
 }
 
 main();

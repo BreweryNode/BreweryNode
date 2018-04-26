@@ -31,7 +31,6 @@ exports.send = async function(topic, message) {
     await exports.channel.publish(exports.exchange, topic, new Buffer(message));
   } catch (err) {
     logutil.error(err);
-    throw new Error('Error Sending');
   }
 };
 

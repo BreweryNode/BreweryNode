@@ -40,10 +40,7 @@ module.exports = (sequelize, DataTypes) => {
   functions.defineDTO(Boiler, extraModels);
   functions.defineVersions(Boiler, extraModels);
   functions.addMessageHandlers(Boiler, extraModels);
-
-  Boiler.hook('afterUpdate', (instance, options) => {
-    instance.process(instance, options);
-  });
+  functions.addUpdateProcessor(Boiler);
 
   Boiler.doCompare = functions.numericCompare;
 
@@ -68,7 +65,8 @@ module.exports = (sequelize, DataTypes) => {
     if (boilers !== null) {
       each(boilers, async function(boiler) {
         boiler = await Boiler.lockByModel(boiler);
-        boiler.reading(boiler, dto);
+        await boiler.reading(boiler, dto);
+        Boiler.unlock(boiler);
       });
     }
   };
@@ -77,7 +75,7 @@ module.exports = (sequelize, DataTypes) => {
     let dto = JSON.parse(msg.content.toString());
     let boilers = await Boiler.findAll({
       where: {
-        temperature: dto.name
+        flow: dto.name
       },
       attributes: ['id']
     });
@@ -91,7 +89,7 @@ module.exports = (sequelize, DataTypes) => {
           current |= FLOW_ERROR;
         }
         await boiler.update({ errorFlags: current });
-        lockutils.unlock(boiler.mutex);
+        Boiler.unlock(boiler);
       });
     }
   };
@@ -99,10 +97,10 @@ module.exports = (sequelize, DataTypes) => {
   Boiler.prototype.process = async function(instance, options) {
     if (options.fields.indexOf('enabled') !== -1 && this.enabled) {
       if ((this.stateFlags & PUMP_ON) === 0 && (this.stateFlags & PUMP_REQUESTED) === 0) {
-        winston.info(this.name + ' is in enabled and not running - enabling pump');
+        winston.info(this.name + ' is enabled and not running - enabling pump');
         setTimeout(Boiler.timeoutFlow, 2000, this);
         mq.send('pump.v1.set', JSON.stringify({ name: this.pump, value: true }));
-        this.update({ stateFlags: (this.stateFlags |= PUMP_ON | PUMP_REQUESTED) });
+        await this.update({ stateFlags: (this.stateFlags |= PUMP_ON | PUMP_REQUESTED) });
         return;
       }
     }
@@ -116,35 +114,39 @@ module.exports = (sequelize, DataTypes) => {
           winston.info(this.name + ' is in error - disabling heaters');
           mq.send('heater.v1.set', JSON.stringify({ name: this.element1, value: false }));
           mq.send('heater.v1.set', JSON.stringify({ name: this.element2, value: false }));
-          this.update({ stateFlags: (this.stateFlags &= ~HEATER_ON) });
+          await this.update({ stateFlags: (this.stateFlags &= ~HEATER_ON) });
         }
         if ((this.stateFlags & PUMP_ON) === PUMP_ON) {
           winston.info(this.name + ' is in error - disabling pump');
           mq.send('pump.v1.set', JSON.stringify({ name: this.pump, value: false }));
-          this.update({ stateFlags: (this.stateFlags &= ~PUMP_ON) });
+          await this.update({ stateFlags: (this.stateFlags &= ~PUMP_ON) });
         }
       } else if ((this.stateFlags & HEATER_ON) === 0) {
         winston.info(this.name + ' is in enabled and pumping - enabling heaters');
         mq.send('heater.v1.set', JSON.stringify({ name: this.element1, value: true }));
         mq.send('heater.v1.set', JSON.stringify({ name: this.element2, value: true }));
-        this.update({ stateFlags: (this.stateFlags |= HEATER_ON) });
+        await this.update({ stateFlags: (this.stateFlags |= HEATER_ON) });
       }
-    } else if ((this.stateFlags & HEATER_ON) === HEATER_ON) {
-      winston.info(this.name + ' is disabled - disabling heaters');
-      mq.send('heater.v1.set', JSON.stringify({ name: this.element1, value: false }));
-      mq.send('heater.v1.set', JSON.stringify({ name: this.element2, value: false }));
-      this.update({ stateFlags: (this.stateFlags &= ~HEATER_ON) });
-    }
-    if ((this.stateFlags & PUMP_ON) === PUMP_ON) {
-      winston.info(this.name + ' is disabled - disabling pump');
-      mq.send('pump.v1.set', JSON.stringify({ name: this.pump, value: false }));
-      this.update({ stateFlags: (this.stateFlags &= ~PUMP_ON) });
+    } else {
+      if ((this.stateFlags & HEATER_ON) === HEATER_ON) {
+        winston.info(this.name + ' is disabled - disabling heaters');
+        mq.send('heater.v1.set', JSON.stringify({ name: this.element1, value: false }));
+        mq.send('heater.v1.set', JSON.stringify({ name: this.element2, value: false }));
+        await this.update({ stateFlags: (this.stateFlags &= ~HEATER_ON) });
+      }
+      if ((this.stateFlags & PUMP_ON) === PUMP_ON) {
+        winston.info(this.name + ' is disabled - disabling pump');
+        mq.send('pump.v1.set', JSON.stringify({ name: this.pump, value: false }));
+        await this.update({ stateFlags: (this.stateFlags &= ~PUMP_ON) });
+      }
     }
   };
 
   Boiler.timeoutFlow = async function(instance) {
     winston.info(instance.name + ' marking flow timeout');
-    instance.update({ stateFlags: (instance.stateFlags &= ~PUMP_REQUESTED) });
+    instance = await Boiler.lockByModel(instance);
+    await instance.update({ stateFlags: (instance.stateFlags &= ~PUMP_REQUESTED) });
+    Boiler.unlock(instance);
   };
 
   Boiler.bootstrap = async function() {
@@ -160,7 +162,6 @@ module.exports = (sequelize, DataTypes) => {
     mq.send('heater.v1.getcurrentvalue', JSON.stringify({ name: this.element1 }));
     mq.send('heater.v1.getcurrentvalue', JSON.stringify({ name: this.element2 }));
     mq.send('flow.v1.getcurrentvalue', JSON.stringify({ name: this.flow }));
-    mq.send('pump.v1.getcurrentvalue', JSON.stringify({ name: this.pump }));
     mq.send('temperature.v1.getcurrentvalue', JSON.stringify({ name: this.temperature }));
   };
 

@@ -1,6 +1,5 @@
 const mq = require('../mq');
 const winston = require('winston');
-const lockutils = require('../lockutils');
 
 exports.getVersionedFields = function(versionedFields) {
   versionedFields.push('requestedValue');
@@ -22,13 +21,13 @@ exports.addMessageHandlers = function(dbClass, messageHandlers) {
   });
 };
 
-exports.addMethods = function(dbClass, config) {
+exports.addMethods = function(dbClass) {
   dbClass.requestSet = async function(dto) {
     try {
       let record = await dbClass.find(dto, true);
       if (record) {
         await record.requestSet(record, dto);
-        lockutils.unlock(record.mutex);
+        dbClass.unlock(record);
         return record;
       }
       winston.warn('Unknown ' + dbClass.getName() + ': ' + dto.name);
@@ -39,7 +38,7 @@ exports.addMethods = function(dbClass, config) {
 
   dbClass.prototype.requestSet = async function(instance, dto) {
     try {
-      if (!dbClass.doCompare(instance.requestedValue, dto.value, config.comparison)) {
+      if (!dbClass.doCompare(instance.requestedValue, dto.value)) {
         await instance.update({ requestedValue: dto.value });
       }
     } catch (err) {
@@ -48,12 +47,10 @@ exports.addMethods = function(dbClass, config) {
   };
 };
 
-exports.addHooks = function(dbClass, config) {
+exports.addHooks = function(dbClass) {
   dbClass.hook('afterUpdate', (instance, options) => {
     if (options.fields.indexOf('requestedValue') !== -1) {
-      if (
-        !dbClass.doCompare(instance.requestedValue, instance.value, config.comparison)
-      ) {
+      if (!dbClass.doCompare(instance.requestedValue, instance.value)) {
         mq.send(
           dbClass.getName().toLowerCase() + '.' + instance.name + '.set',
           JSON.stringify({ value: instance.requestedValue })

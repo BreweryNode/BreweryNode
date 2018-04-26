@@ -36,10 +36,7 @@ module.exports = (sequelize, DataTypes) => {
   functions.defineDTO(ColdWater, extraModels);
   functions.defineVersions(ColdWater, extraModels);
   functions.addMessageHandlers(ColdWater, extraModels);
-
-  ColdWater.hook('afterUpdate', instance => {
-    instance.process();
-  });
+  functions.addUpdateProcessor(ColdWater);
 
   ColdWater.doCompare = functions.numericCompare;
 
@@ -62,9 +59,10 @@ module.exports = (sequelize, DataTypes) => {
       attributes: ['id']
     });
     if (coldWaters !== null) {
-      each(coldWaters, async function(hw) {
-        hw = await ColdWater.lockByModel(hw);
-        hw.reading(hw, dto);
+      each(coldWaters, async function(cw) {
+        cw = await ColdWater.lockByModel(cw);
+        await cw.reading(cw, dto);
+        ColdWater.unlock(cw);
       });
     }
   };
@@ -78,16 +76,16 @@ module.exports = (sequelize, DataTypes) => {
       attributes: ['id']
     });
     if (coldWaters !== null) {
-      each(coldWaters, async function(hw) {
-        hw = await ColdWater.lockByModel(hw);
-        let current = hw.errorFlags;
+      each(coldWaters, async function(cw) {
+        cw = await ColdWater.lockByModel(cw);
+        let current = cw.errorFlags;
         if (dto.value) {
           current &= ~LEVEL_ERROR;
         } else {
           current |= LEVEL_ERROR;
         }
-        await hw.update({ errorFlags: current });
-        lockutils.unlock(hw.mutex);
+        await cw.update({ errorFlags: current });
+        ColdWater.unlock(cw);
       });
     }
   };
@@ -98,7 +96,7 @@ module.exports = (sequelize, DataTypes) => {
         if ((this.stateFlags & COOLER_ON) > 0) {
           winston.info(this.name + ' is in error - disabling cooler');
           mq.send('cooler.v1.set', JSON.stringify({ name: this.cooler, value: false }));
-          this.update({ stateFlags: (this.stateFlags &= ~COOLER_ON) });
+          await this.update({ stateFlags: (this.stateFlags &= ~COOLER_ON) });
         }
       } else if (
         this.stateFlags === 0 &&
@@ -115,7 +113,7 @@ module.exports = (sequelize, DataTypes) => {
             ') - enabling cooler'
         );
         mq.send('cooler.v1.set', JSON.stringify({ name: this.cooler, value: true }));
-        this.update({ stateFlags: (this.stateFlags |= COOLER_ON) });
+        await this.update({ stateFlags: (this.stateFlags |= COOLER_ON) });
       } else if ((this.stateFlags & COOLER_ON) > 0 && this.value <= this.requestedValue) {
         winston.info(
           this.name +
@@ -128,12 +126,12 @@ module.exports = (sequelize, DataTypes) => {
             ') - disabling cooler'
         );
         mq.send('cooler.v1.set', JSON.stringify({ name: this.cooler, value: false }));
-        this.update({ stateFlags: (this.stateFlags &= ~COOLER_ON) });
+        await this.update({ stateFlags: (this.stateFlags &= ~COOLER_ON) });
       }
     } else if (this.stateFlags > 0) {
       winston.info('System disabled - disabling cooler');
       mq.send('cooler.v1.set', JSON.stringify({ name: this.cooler, value: false }));
-      this.update({ stateFlags: (this.stateFlags &= ~COOLER_ON) });
+      await this.update({ stateFlags: (this.stateFlags &= ~COOLER_ON) });
     }
   };
 

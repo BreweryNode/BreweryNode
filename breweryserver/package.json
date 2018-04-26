@@ -78,6 +78,7 @@
   },
   "license": "GPL-3.0",
   "dependencies": {
+    "async-each": "^1.0.1",
     "bluebird": "^3.5.1",
     "brewerynode-common": "../common",
     "brewerynode-deviceserver": "../deviceserver",
@@ -86,7 +87,6 @@
     "sequelize": "^4.33.3",
     "sequelize-paper-trail": "2.0.0-biggms",
     "sequelize-version": "0.0.54",
-    "winston": "^3.0.0-rc1",
-    "async-each": "^1.0.1"
+    "winston": "^3.0.0-rc1"
   }
 }

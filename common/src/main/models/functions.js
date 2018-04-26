@@ -1,5 +1,3 @@
-const logutil = require('../logutil');
-
 const dto = require('dto');
 const Version = require('sequelize-version');
 const winston = require('winston');
@@ -72,11 +70,31 @@ function booleanCompare(val1, val2) {
   return String(val1) === String(val2);
 }
 
+function stringCompare(val1, val2) {
+  winston.silly(
+    'String comparing ' + val1 + ' to: ' + val2 + ' = ' + (String(val1) === String(val2))
+  );
+  return String(val1) === String(val2);
+}
+
+function addUpdateProcessor(model) {
+  model.hook('afterUpdate', async (instance, options) => {
+    return new Promise(async function(resolve) {
+      resolve();
+      instance = await model.lockByModel(instance);
+      await instance.process(instance, options);
+      model.unlock(instance);
+    });
+  });
+}
+
 module.exports = {
   defineTable: defineTable,
   defineDTO: defineDTO,
   defineVersions: defineVersions,
   numericCompare: numericCompare,
   booleanCompare: booleanCompare,
-  addMessageHandlers: addMessageHandlers
+  stringCompare: stringCompare,
+  addMessageHandlers: addMessageHandlers,
+  addUpdateProcessor: addUpdateProcessor
 };

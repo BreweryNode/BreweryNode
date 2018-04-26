@@ -1,25 +1,29 @@
 const winston = require('winston');
 const mq = require('brewerynode-common').mq;
-const mainfold = require('../models').Mainfold;
+const manifold = require('../models').Manifold;
 
 function handleMessage(msg) {
-  mainfold.handleMessage(msg);
+  manifold.handleMessage(msg);
 }
 
 function registerMQ() {
-  winston.silly('Registering Mainfold handlers');
-  return Promise.all([mq.recv('mainfold', 'mainfold.v1.#', false, handleMessage)]);
+  winston.silly('Registering Manifold handlers');
+  return Promise.all([
+    mq.recv('manifold', 'manifold.v1.#', false, handleMessage),
+    mq.recv('', 'valve.v1.valuechanged', true, manifold.handleValveChange)
+  ]);
 }
 
 function createTestData() {
   return Promise.all([
-    mainfold.createNew({
-      name: 'Cold Water',
-      cooler: 'Freezer',
-      level: 'Cold Water',
-      temperature: 'Cold Water',
-      requestedValue: 2,
-      enabled: true
+    manifold.createNew({
+      name: 'Manifold',
+      warmWaterInput: 'Warm Water Input',
+      warmWaterOutput: 'Warm Water Output',
+      coldWaterInput: 'Cold Water Input',
+      coldWaterOutput: 'Cold Water Output',
+      mainsWaterInput: 'Mains Water Input',
+      mainsWaterOutput: 'Mains Water Output'
     })
   ]);
 }
@@ -27,7 +31,7 @@ function createTestData() {
 async function main() {
   await registerMQ();
   await createTestData();
-  mainfold.bootstrap();
+  manifold.bootstrap();
 }
 
 main();

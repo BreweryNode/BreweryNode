@@ -19,6 +19,13 @@ db.ColdWater = model.single;
 model = sequelize.import('hotwater', require('./hotwater'));
 db.HotWater = model.single;
 
+db.MashTun = sequelize.import('mashtun', require('./mashtun'));
+
+db.Manifold = sequelize.import('manifold', require('./manifold'));
+
+model = sequelize.import('heatexchanger', require('./heatexchanger'));
+db.HeatExchanger = model.single;
+
 Object.keys(db).forEach(function(modelName) {
   if (db[modelName].associate) {
     db[modelName].associate(db);

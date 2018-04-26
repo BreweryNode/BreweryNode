@@ -15,7 +15,8 @@ function createTestData() {
   return Promise.all([
     temperature.createNew({ mac: '28ff220b00150208', name: 'Cold Water' }),
     temperature.createNew({ mac: '28ff6a02641403ed', name: 'Warm Water' }),
-    temperature.createNew({ mac: '28ff983d6414031a', name: 'Fermenter' })
+    temperature.createNew({ mac: '28ff983d6414031a', name: 'Fermenter' }),
+    temperature.createNew({ mac: 'xxxxxxxxxxxxxxxx', name: 'Boiler' })
   ]);
 }
 
@@ -23,10 +24,10 @@ async function main() {
   await registerMQ();
   await createTestData();
 
-  mq.send(
+  /* Mq.send(
     'temperature.v1.reading',
     JSON.stringify({ mac: '28ff220b00150208', value: 3 })
-  );
+  ); */
 }
 
 main();

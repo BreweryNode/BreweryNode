@@ -23,7 +23,7 @@ async function main() {
   await registerMQ();
   await createTestData();
 
-  mq.send('flow.v1.reading', JSON.stringify({ name: 'Cold Water', value: true }));
+  //  Mq.send('flow.v1.reading', JSON.stringify({ name: 'Cold Water', value: true }));
 }
 
 main();

@@ -1,6 +1,5 @@
 const mq = require('../mq');
 const winston = require('winston');
-const lockutils = require('../lockutils');
 
 exports.getVersionedFields = function(versionedFields) {
   versionedFields.push('value');
@@ -13,7 +12,6 @@ exports.getFields = function(sequelize, DataTypes, config, fields) {
 };
 
 exports.getDTOFields = function(dtoFields) {
-  dtoFields.push('name');
   dtoFields.push('value');
 };
 
@@ -31,7 +29,7 @@ exports.addMethods = function(dbClass, config) {
       let record = await dbClass.find(dto, true);
       if (record) {
         await record.reading(record, dto);
-        lockutils.unlock(record.mutex);
+        dbClass.unlock(record);
       } else {
         winston.warn('Unknown ' + dbClass.getName() + ': ' + dto.name);
       }
@@ -58,7 +56,7 @@ exports.addMethods = function(dbClass, config) {
 
   dbClass.prototype.reading = async function(instance, dto) {
     try {
-      if (!dbClass.doCompare(instance.value, dto.value, config.comparison)) {
+      if (!dbClass.doCompare(instance.value, dto.value)) {
         return await instance.update({ value: dto.value });
       }
     } catch (err) {

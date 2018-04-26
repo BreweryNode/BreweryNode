@@ -1,7 +1,6 @@
 const mq = require('../mq');
 const winston = require('winston');
 const functions = require('./functions');
-const lockutils = require('../lockutils');
 
 exports.getVersionedFields = function(versionedFields) {
   versionedFields.push('enabled');
@@ -26,7 +25,7 @@ exports.addMessageHandlers = function(dbClass, messageHandlers) {
   });
 };
 
-exports.addMethods = function(dbClass, config) {
+exports.addMethods = function(dbClass) {
   dbClass.enable = async function(dto) {
     Object.assign(dto, { enabled: true });
     return dbClass.setState(dto);
@@ -42,7 +41,7 @@ exports.addMethods = function(dbClass, config) {
       let record = await dbClass.find(dto, true);
       if (record) {
         await record.setState(record, dto);
-        lockutils.unlock(record.mutex);
+        dbClass.unlock(record);
         return record;
       }
       winston.warn('Unknown ' + dbClass.getName() + ': ' + dto.name);
@@ -53,7 +52,7 @@ exports.addMethods = function(dbClass, config) {
 
   dbClass.prototype.setState = async function(instance, dto) {
     try {
-      if (!functions.booleanCompare(instance.enabled, dto.enabled, config.comparison)) {
+      if (!functions.booleanCompare(instance.enabled, dto.enabled)) {
         await instance.update({ enabled: dto.enabled });
       }
     } catch (err) {

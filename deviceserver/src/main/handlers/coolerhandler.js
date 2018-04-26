@@ -19,7 +19,7 @@ async function main() {
   await registerMQ();
   await createTestData();
 
-  mq.send('cooler.v1.reading', JSON.stringify({ name: 'Freezer', value: true }));
+  // Mq.send('cooler.v1.reading', JSON.stringify({ name: 'Freezer', value: true }));
 }
 
 main();

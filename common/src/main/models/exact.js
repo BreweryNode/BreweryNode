@@ -1,14 +1,8 @@
 const mq = require('../mq');
 
-exports.getVersionedFields = function(versionedFields) {
-  versionedFields.push('tolerance');
-};
+exports.getVersionedFields = function() {};
 
-exports.getFields = function(sequelize, DataTypes, config, fields) {
-  Object.assign(fields, {
-    tolerance: { type: DataTypes.DOUBLE, defaultValue: 0.5 }
-  });
-};
+exports.getFields = function() {};
 
 exports.getDTOFields = function() {};
 
@@ -26,10 +20,10 @@ exports.addHooks = function(dbClass) {
       options.fields.indexOf('value') !== -1 ||
       options.fields.indexOf('requestedValue') !== -1
     ) {
-      if (Math.abs(instance.value - instance.requestedValue) > instance.tolerance) {
-        mq.send(dbClass.getName().toLowerCase() + '.v1.ontarget', 'false');
-      } else {
+      if (dbClass.doCompare(instance.value, instance.requestedValue)) {
         mq.send(dbClass.getName().toLowerCase() + '.v1.ontarget', 'true');
+      } else {
+        mq.send(dbClass.getName().toLowerCase() + '.v1.ontarget', 'false');
       }
     }
   });

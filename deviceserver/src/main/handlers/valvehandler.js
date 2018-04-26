@@ -26,7 +26,7 @@ async function main() {
   await registerMQ();
   await createTestData();
 
-  mq.send('valve.v1.reading', JSON.stringify({ name: 'Fermenter', value: true }));
+  // Mq.send('valve.v1.reading', JSON.stringify({ name: 'Fermenter', value: true }));
 }
 
 main();

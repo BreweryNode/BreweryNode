@@ -12,7 +12,7 @@ const redlock = new Redlock([client1], {
   retryCount: 100,
 
   // The time in ms between attempts
-  retryDelay: 20, // Time in ms
+  retryDelay: 100, // Time in ms
 
   // the max time in ms randomly added to retries
   // to improve performance under high contention
@@ -22,25 +22,23 @@ const redlock = new Redlock([client1], {
 
 async function lock(id, time) {
   try {
-    winston.silly('Locking: ' + id);
     let lock = await redlock.lock(id, time);
-    winston.silly('Locked: ' + id);
     return lock;
   } catch (err) {
     winston.error(err);
   }
 }
 
-function unlock(lock) {
-  winston.silly('Unlocking: ' + lock.resource);
-  lock.unlock();
-  winston.silly('Unlocked: ' + lock.resource);
+async function unlock(lock) {
+  await lock.unlock();
 }
 
 function lockHook(model) {
-  model.addHook('beforeUpdate', instance => {
+  model.addHook('beforeUpdate', (instance, options) => {
     if (!instance.mutex) {
-      throw new Error('Mutex needed');
+      winston.silly(JSON.stringify(instance));
+      winston.silly(JSON.stringify(options));
+      throw new Error(model.getName() + ' Mutex needed');
     }
   });
 }

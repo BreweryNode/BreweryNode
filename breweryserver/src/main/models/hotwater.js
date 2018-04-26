@@ -36,10 +36,7 @@ module.exports = (sequelize, DataTypes) => {
   functions.defineDTO(HotWater, extraModels);
   functions.defineVersions(HotWater, extraModels);
   functions.addMessageHandlers(HotWater, extraModels);
-
-  HotWater.hook('afterUpdate', instance => {
-    instance.process();
-  });
+  functions.addUpdateProcessor(HotWater);
 
   HotWater.doCompare = functions.numericCompare;
 
@@ -64,7 +61,8 @@ module.exports = (sequelize, DataTypes) => {
     if (hotWaters !== null) {
       each(hotWaters, async function(hw) {
         hw = await HotWater.lockByModel(hw);
-        hw.reading(hw, dto);
+        await hw.reading(hw, dto);
+        HotWater.unlock(hw);
       });
     }
   };
@@ -87,7 +85,7 @@ module.exports = (sequelize, DataTypes) => {
           current |= LEVEL_ERROR;
         }
         await hw.update({ errorFlags: current });
-        lockutils.unlock(hw.mutex);
+        HotWater.unlock(hw);
       });
     }
   };
@@ -98,7 +96,7 @@ module.exports = (sequelize, DataTypes) => {
         if ((this.stateFlags & HEATER_ON) > 0) {
           winston.info(this.name + ' is in error - disabling heater');
           mq.send('heater.v1.set', JSON.stringify({ name: this.heater, value: false }));
-          this.update({ stateFlags: (this.stateFlags &= ~HEATER_ON) });
+          await this.update({ stateFlags: (this.stateFlags &= ~HEATER_ON) });
         }
       } else if (
         this.stateFlags === 0 &&
@@ -115,7 +113,7 @@ module.exports = (sequelize, DataTypes) => {
             ') - enabling heater'
         );
         mq.send('heater.v1.set', JSON.stringify({ name: this.heater, value: true }));
-        this.update({ stateFlags: (this.stateFlags |= HEATER_ON) });
+        await this.update({ stateFlags: (this.stateFlags |= HEATER_ON) });
       } else if ((this.stateFlags & HEATER_ON) > 0 && this.value >= this.requestedValue) {
         winston.info(
           this.name +
@@ -128,12 +126,12 @@ module.exports = (sequelize, DataTypes) => {
             ') - disabling heater'
         );
         mq.send('heater.v1.set', JSON.stringify({ name: this.heater, value: false }));
-        this.update({ stateFlags: (this.stateFlags &= ~HEATER_ON) });
+        await this.update({ stateFlags: (this.stateFlags &= ~HEATER_ON) });
       }
     } else if (this.stateFlags > 0) {
       winston.info('System disabled - disabling heater');
       mq.send('heater.v1.set', JSON.stringify({ name: this.heater, value: false }));
-      this.update({ stateFlags: (this.stateFlags &= ~HEATER_ON) });
+      await this.update({ stateFlags: (this.stateFlags &= ~HEATER_ON) });
     }
   };
 
